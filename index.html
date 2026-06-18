@@ -3,2779 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Order Sparepart Elektronik</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>SERCOM Drive - Cloud Storage</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --dark-color: #1f2937;
-            --light-color: #f3f4f6;
-            --sidebar-width: 280px;
-            --header-height: 70px;
-            --base-font-size: 9pt;
-            --red-color: #b91c1c;
-        }
-
-        body {
-            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            line-height: 1.6;
-            font-size: var(--base-font-size);
-            font-weight: 400;
-            letter-spacing: 0.01em;
-        }
-
-        /* Layout Container */
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar Dashboard */
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--red-color);
-            color: white;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .sidebar-header {
-            padding: 15px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-header h2 {
-            font-size: 11pt;
-            font-weight: 500;
-            letter-spacing: 0.02em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .sidebar-header h2 i {
-            color: #ffffff;
-        }
-
-        .sidebar-menu {
-            padding: 15px 0;
-        }
-
-        .menu-item {
-            display: block;
-            padding: 12px 15px;
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-            font-size: var(--base-font-size);
-            font-weight: 400;
-            letter-spacing: 0.01em;
-            white-space: nowrap;
-        }
-
-        .menu-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left-color: var(--primary-color);
-        }
-
-        .menu-item.active {
-            background-color: rgba(37, 99, 235, 0.2);
-            color: white;
-            border-left-color: var(--primary-color);
-            font-weight: 500;
-        }
-
-        .menu-item i {
-            margin-right: 10px;
-            width: 16px;
-            text-align: center;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            height: var(--header-height);
-            background-color: #000000;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 14pt;
-            color: #ffffff;
-            cursor: pointer;
-        }
-
-        .header-title {
-            font-size: 12pt;
-            font-weight: 500;
-            color: #ffffff;
-            letter-spacing: 0.02em;
-            white-space: nowrap;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-info span {
-            color: #ffffff;
-            font-weight: 400;
-            letter-spacing: 0.01em;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 500;
-            font-size: var(--base-font-size);
-        }
-
-        /* Content Area */
-        .content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        /* Page Sections */
-        .page-section {
-            display: none;
-        }
-
-        .page-section.active {
-            display: block;
-        }
-
-        /* Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .stat-card-title {
-            font-size: 8pt;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .stat-card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14pt;
-        }
-
-        .stat-card-value {
-            font-size: 16pt;
-            font-weight: 500;
-            color: var(--dark-color);
-            letter-spacing: 0.01em;
-        }
-
-        .stat-card-change {
-            font-size: 8pt;
-            margin-top: 5px;
-            letter-spacing: 0.01em;
-        }
-
-        .stat-card-change.positive {
-            color: var(--success-color);
-        }
-
-        .stat-card-change.negative {
-            color: var(--danger-color);
-        }
-
-        /* Form Section */
-        .form-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 11pt;
-            font-weight: 500;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: 0.02em;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 5px;
-            color: #374151;
-            font-size: var(--base-font-size);
-            letter-spacing: 0.01em;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: var(--base-font-size);
-            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            letter-spacing: 0.01em;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        /* Status Badge */
-        .status-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 8pt;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-            white-space: nowrap;
-        }
-
-        .status-open {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-ready {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-finish {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-proses {
-            background-color: #e9d5ff;
-            color: #6b21a8;
-        }
-
-        .status-teknis {
-            background-color: #fed7aa;
-            color: #7c2d12;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 4px;
-            font-size: var(--base-font-size);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 0.01em;
-            white-space: nowrap;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #059669;
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-
-        .btn-secondary {
-            background-color: #6b7280;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #4b5563;
-        }
-
-        .btn-excel {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .btn-excel:hover {
-            background-color: #059669;
-        }
-
-        .btn-upload {
-            background-color: #8b5cf6;
-            color: white;
-        }
-
-        .btn-upload:hover {
-            background-color: #7c3aed;
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 8pt;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Table Section */
-        .table-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .table-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .search-box {
-            position: relative;
-            width: 250px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 8px 12px 8px 35px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: var(--base-font-size);
-            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            letter-spacing: 0.01em;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            font-size: var(--base-font-size);
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: var(--base-font-size);
-            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            letter-spacing: 0.01em;
-        }
-
-        th, td {
-            padding: 8px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-            white-space: nowrap;
-        }
-
-        th {
-            background-color: #f9fafb;
-            font-weight: 500;
-            color: #374151;
-            position: sticky;
-            top: 0;
-            font-size: var(--base-font-size);
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-        }
-
-        tr:hover {
-            background-color: #f9fafb;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-        }
-
-        .action-btn {
-            padding: 5px 8px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 8pt;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .action-btn.edit {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .action-btn.edit:hover {
-            background-color: #2563eb;
-        }
-
-        .action-btn.delete {
-            background-color: #ef4444;
-            color: white;
-        }
-
-        .action-btn.delete:hover {
-            background-color: #dc2626;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 25px;
-            border-radius: 8px;
-            max-width: 90%;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 12pt;
-            font-weight: 500;
-            letter-spacing: 0.02em;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 14pt;
-            cursor: pointer;
-            color: #6b7280;
-        }
-
-        .modal-close:hover {
-            color: var(--danger-color);
-        }
-
-        /* Hide form group for teknisi */
-        .hide-for-teknisi {
-            display: none;
-        }
-
-        /* Upload Area - Compact Version */
-        .upload-section {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            padding: 15px;
-        }
-
-        .upload-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .upload-title {
-            font-size: 10pt;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 0.02em;
-            color: var(--dark-color);
-        }
-
-        .upload-area {
-            border: 2px dashed #d1d5db;
-            border-radius: 6px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            margin-bottom: 12px;
-            background-color: #fafafa;
-        }
-
-        .upload-area:hover {
-            border-color: var(--primary-color);
-            background-color: rgba(37, 99, 235, 0.05);
-        }
-
-        .upload-area.dragover {
-            border-color: var(--primary-color);
-            background-color: rgba(37, 99, 235, 0.1);
-        }
-
-        .upload-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .upload-icon {
-            font-size: 20pt;
-            color: #9ca3af;
-        }
-
-        .upload-text {
-            font-size: 9pt;
-            color: #6b7280;
-            font-weight: 400;
-        }
-
-        .upload-hint {
-            font-size: 7pt;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .upload-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-        }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 18px;
-            border-radius: 4px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 3000;
-            font-size: var(--base-font-size);
-            letter-spacing: 0.01em;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            background-color: var(--success-color);
-        }
-
-        .toast.error {
-            background-color: var(--danger-color);
-        }
-
-        .toast.info {
-            background-color: var(--primary-color);
-        }
-
-        .toast.warning {
-            background-color: var(--warning-color);
-        }
-
-        /* Connection Status */
-        .connection-status {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 8pt;
-            font-weight: 500;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .connection-status.online {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .connection-status.offline {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .menu-toggle {
-                display: block;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .table-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .table-actions {
-                justify-content: space-between;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
-            .table-wrapper {
-                overflow-x: scroll;
-            }
-
-            table {
-                min-width: 800px;
-            }
-
-            .upload-content {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .upload-actions {
-                flex-direction: column;
-            }
-        }
+            --primary: #1a73e8;
+            --bg: #f1f3f4;
+            --sidebar: #e8eaed;
+            --text: #202124;
+            --hover: #d2e3fc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Google Sans', Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); }
+
+        /* LOGIN PAGE */
+        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #1a73e8, #6fa4f5); }
+        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 350px; text-align: center; }
+        .login-box h2 { margin-bottom: 20px; color: var(--primary); }
+        .login-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .login-box button { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .login-box button:hover { background: #1557b0; }
+        .login-error { color: red; font-size: 12px; margin-top: 10px; display: none; }
+
+        /* MAIN APP */
+        #main-app { display: none; height: 100vh; }
+        .header { background: white; padding: 10px 20px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .header .logo { font-size: 22px; font-weight: bold; color: var(--primary); margin-right: 20px; }
+        .search-bar { flex-grow: 1; background: var(--bg); padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; }
+        .search-bar input { border: none; background: transparent; outline: none; width: 100%; font-size: 16px; }
+        .user-info { margin-left: 20px; font-size: 14px; }
+        .btn-logout { background: #ddd; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+
+        .container { display: flex; height: calc(100vh - 60px); }
+        
+        /* SIDEBAR */
+        .sidebar { width: 250px; background: white; padding: 20px; border-right: 1px solid #ddd; overflow-y: auto; }
+        .btn-new { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 20px; width: 100%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .btn-new:hover { background: #1557b0; }
+        .sidebar-menu { display: flex; flex-direction: column; gap: 5px; }
+        .menu-item { padding: 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .menu-item:hover, .menu-item.active { background: var(--hover); }
+        
+        /* CONTENT */
+        .content { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-card h3 { font-size: 14px; color: #5f6368; margin-bottom: 5px; }
+        .stat-card p { font-size: 24px; font-weight: bold; color: var(--primary); }
+
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .view-toggle button { background: none; border: 1px solid #ccc; padding: 5px 10px; cursor: pointer; }
+        .view-toggle button.active { background: var(--hover); border-color: var(--primary); }
+
+        /* DROP ZONE */
+        .drop-zone { border: 2px dashed #ccc; border-radius: 8px; padding: 30px; text-align: center; margin-bottom: 20px; display: none; background: #fafafa; }
+        .drop-zone.active { border-color: var(--primary); background: #e8f0fe; }
+
+        /* FILES DISPLAY */
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .file-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; text-align: center; transition: 0.2s; position: relative; }
+        .file-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.15); transform: translateY(-2px); }
+        .file-card .icon { font-size: 50px; margin-bottom: 10px; }
+        .file-card .name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-card .date { font-size: 11px; color: #5f6368; margin-top: 5px; }
+        .file-card .delete-btn { position: absolute; top: 5px; right: 5px; background: rgba(255,255,255,0.8); border: none; cursor: pointer; color: red; display: none; }
+        .file-card:hover .delete-btn { display: block; }
+
+        .file-list { display: none; } /* Default grid, toggle to list via JS */
+        .file-list table { width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-collapse: collapse; }
+        .file-list th { text-align: left; padding: 12px; background: #f8f9fa; color: #5f6368; font-size: 14px; border-bottom: 1px solid #ddd; }
+        .file-list td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .file-list tr:hover td { background: #f1f3f4; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; padding: 30px; border-radius: 8px; width: 500px; max-width: 90%; max-height: 90vh; overflow-y: auto; position: relative; }
+        .modal-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; }
+        .modal h2 { margin-bottom: 20px; }
+        .modal input[type="text"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }
+        .modal button { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; }
+        
+        .preview-container { width: 100%; height: 70vh; display: flex; flex-direction: column; align-items: center; }
+        .preview-container img, .preview-container iframe { max-width: 100%; max-height: 90%; margin-bottom: 20px; }
+        .btn-download { background: #4CAF50 !important; text-decoration: none; padding: 10px 20px; color: white; border-radius: 4px; }
+
+        /* Folder Colors */
+        .clr-folder { color: #5f6368; }
+        .clr-pdf { color: #e8453c; }
+        .clr-img { color: #8ab4f8; }
+        .clr-excel { color: #34a853; }
+        .clr-word { color: #4285f4; }
+        .clr-video { color: #ab47bc; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Dashboard -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-microchip"></i> ORDER SPAREPART KUPANG</h2>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-page">
+        <div class="login-box">
+            <h2><i class="fa-solid fa-hard-drive"></i> SERCOM Drive</h2>
+            <p style="margin-bottom: 15px; color: #666;">Sistem Penyimpanan Service</p>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Masuk</button>
+            <div class="login-error" id="login-error">Email atau password salah!</div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app">
+        <div class="header">
+            <div class="logo"><i class="fa-solid fa-hard-drive"></i> SERCOM Drive</div>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass" style="margin-right: 10px;"></i>
+                <input type="text" id="search-input" placeholder="Cari file..." onkeyup="renderFiles()">
             </div>
-            <nav class="sidebar-menu">
-                <a href="#" class="menu-item active" data-page="dashboard">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="#" class="menu-item" data-page="order-baru">
-                    <i class="fas fa-plus-circle"></i> Order Baru
-                </a>
-                <a href="#" class="menu-item" data-page="daftar-order">
-                    <i class="fas fa-list"></i> Daftar Order
-                </a>
-                <a href="#" class="menu-item" data-page="teknisi">
-                    <i class="fas fa-user-tie"></i> Teknisi
-                </a>
-                <a href="#" class="menu-item" data-page="admin-sparepart">
-                    <i class="fas fa-tools"></i> Admin Sparepart
-                </a>
-                <a href="#" class="menu-item" data-page="pelanggan">
-                    <i class="fas fa-users"></i> Pelanggan
-                </a>
-                <a href="#" class="menu-item" data-page="laporan">
-                    <i class="fas fa-chart-bar"></i> Laporan
-                </a>
-                <a href="#" class="menu-item" data-page="pengaturan">
-                    <i class="fas fa-cog"></i> Pengaturan
-                </a>
-            </nav>
-        </aside>
+            <div class="user-info">
+                <span id="user-email"></span>
+                <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+            </div>
+        </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <div class="header-left">
-                    <button class="menu-toggle" id="menuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="header-title" id="pageTitle">Order Sparepart Elektronik</h1>
+        <div class="container">
+            <div class="sidebar">
+                <button class="btn-new" onclick="openUploadModal()"><i class="fa-solid fa-plus"></i> Baru</button>
+                
+                <div class="sidebar-menu">
+                    <div class="menu-item active" onclick="navigate('all')"><i class="fa-solid fa-file"></i> Semua File</div>
+                    <div class="menu-item" onclick="navigate('folder')"><i class="fa-solid fa-folder"></i> Folder</div>
+                    <div class="menu-item" onclick="navigate('image')"><i class="fa-solid fa-image"></i> Foto</div>
+                    <div class="menu-item" onclick="navigate('pdf')"><i class="fa-solid fa-file-pdf"></i> PDF</div>
+                    <div class="menu-item" onclick="navigate('excel')"><i class="fa-solid fa-file-excel"></i> Excel</div>
+                    <div class="menu-item" onclick="navigate('video')"><i class="fa-solid fa-file-video"></i> Video</div>
                 </div>
-                <div class="header-right">
-                    <div class="user-info">
-                        <span>Admin</span>
-                        <div class="user-avatar">A</div>
-                    </div>
-                </div>
-            </header>
 
-            <!-- Connection Status Indicator -->
-            <div class="connection-status offline" id="connectionStatus">
-                <i class="fas fa-wifi"></i>
-                <span>Offline</span>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+                <button class="btn-new" style="background: white; color: var(--text); border: 1px solid #ddd;" onclick="openFolderModal()"><i class="fa-solid fa-folder-plus"></i> Buat Folder</button>
             </div>
 
-            <!-- Content Area -->
             <div class="content">
-                <!-- Dashboard Page -->
-                <div class="page-section active" id="dashboard">
-                    <!-- Statistics Cards -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">Total Order</span>
-                                <div class="stat-card-icon" style="background-color: rgba(37, 99, 235, 0.1); color: var(--primary-color);">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="totalOrderValue">0</div>
-                            <div class="stat-card-change positive">
-                                <i class="fas fa-arrow-up"></i> 12% dari bulan lalu
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">Order Hari Ini</span>
-                                <div class="stat-card-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color);">
-                                    <i class="fas fa-calendar-day"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="todayOrderValue">0</div>
-                            <div class="stat-card-change positive">
-                                <i class="fas fa-arrow-up"></i> 5% dari kemarin
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">Pending Order</span>
-                                <div class="stat-card-icon" style="background-color: rgba(245, 158, 11, 0.1); color: var(--warning-color);">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="pendingOrderValue">0</div>
-                            <div class="stat-card-change negative">
-                                <i class="fas fa-arrow-down"></i> 3% dari kemarin
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">JUMLAH OPEN</span>
-                                <div class="stat-card-icon" style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color);">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="openOrderValue">0</div>
-                            <div class="stat-card-change">
-                                <i class="fas fa-minus"></i> Order status OPEN
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">JUMLAH READY</span>
-                                <div class="stat-card-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="readyOrderValue">0</div>
-                            <div class="stat-card-change">
-                                <i class="fas fa-minus"></i> Order status READY
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">JUMLAH FINISH</span>
-                                <div class="stat-card-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color);">
-                                    <i class="fas fa-check-double"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="finishOrderValue">0</div>
-                            <div class="stat-card-change">
-                                <i class="fas fa-minus"></i> Order status FINISH
-                            </div>
-                        </div>
-                        <!-- Kartu untuk PROSES PEMENUHAN -->
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">PROSES PEMENUHAN</span>
-                                <div class="stat-card-icon" style="background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
-                                    <i class="fas fa-truck"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="prosesPemenuhanValue">0</div>
-                            <div class="stat-card-change">
-                                <i class="fas fa-minus"></i> Order dalam proses pemenuhan
-                            </div>
-                        </div>
-                        <!-- Kartu untuk TEKNIS -->
-                        <div class="stat-card">
-                            <div class="stat-card-header">
-                                <span class="stat-card-title">TEKNIS</span>
-                                <div class="stat-card-icon" style="background-color: rgba(251, 146, 60, 0.1); color: #fb923c;">
-                                    <i class="fas fa-wrench"></i>
-                                </div>
-                            </div>
-                            <div class="stat-card-value" id="teknisValue">0</div>
-                            <div class="stat-card-change">
-                                <i class="fas fa-minus"></i> Order status TEKNIS
-                            </div>
-                        </div>
+                <div class="stats">
+                    <div class="stat-card"><h3>Total File</h3><p id="stat-files">0</p></div>
+                    <div class="stat-card"><h3>Total Folder</h3><p id="stat-folders">0</p></div>
+                    <div class="stat-card"><h3>Kapasitas Terpakai</h3><p id="stat-size">0 KB</p></div>
+                </div>
+
+                <div id="current-path" style="font-size: 18px; font-weight: bold; margin-bottom: 15px; cursor: pointer;">
+                    <i class="fa-solid fa-house"></i> Beranda
+                </div>
+
+                <div class="drop-zone" id="drop-zone">
+                    <i class="fa-solid fa-cloud-arrow-up" style="font-size: 40px; color: var(--primary);"></i>
+                    <p>Drag & Drop file di sini</p>
+                </div>
+
+                <div class="action-bar">
+                    <div id="folder-info"></div>
+                    <div class="view-toggle">
+                        <button id="btn-grid" class="active" onclick="setView('grid')"><i class="fa-solid fa-grip"></i></button>
+                        <button id="btn-list" onclick="setView('list')"><i class="fa-solid fa-list"></i></button>
                     </div>
                 </div>
 
-                <!-- Teknisi Page -->
-                <div class="page-section" id="teknisi">
-                    <!-- Table Section -->
-                    <section class="table-section">
-                        <div class="table-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-user-tie"></i> Data Order Teknisi
-                            </h2>
-                            <div class="table-actions">
-                                <button class="btn btn-excel" onclick="downloadTeknisiExcel()">
-                                    <i class="fas fa-file-excel"></i> Download Excel
-                                </button>
-                                <div class="search-box">
-                                    <i class="fas fa-search"></i>
-                                    <input type="text" id="teknisiSearchInput" placeholder="Cari order...">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="teknisiTable">
-                                <thead>
-                                    <tr>
-                                        <th>NO</th>
-                                        <th>NAMA TEKNISI</th>
-                                        <th>TGL</th>
-                                        <th>NO. CASE</th>
-                                        <th>TYPE</th>
-                                        <th>NO. SERI</th>
-                                        <th>NO. PART</th>
-                                        <th>NAMA ITEM</th>
-                                        <th>JUMLAH</th>
-                                        <th>KATEGORI</th>
-                                        <th>LAYANAN</th>
-                                        <th>KONSUMEN</th>
-                                        <th>NO. TELP</th>
-                                        <th>STATUS</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="teknisiTableBody">
-                                    <!-- Data akan diisi oleh JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                <div class="file-grid" id="file-grid"></div>
+                <div class="file-list" id="file-list">
+                    <table>
+                        <thead><tr><th>Nama</th><th>Tipe</th><th>Ukuran</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+                        <tbody id="file-list-body"></tbody>
+                    </table>
                 </div>
-
-                <!-- Order Baru Page -->
-                <div class="page-section" id="order-baru">
-                    <!-- Form Section -->
-                    <section class="form-section">
-                        <h2 class="section-title">
-                            <i class="fas fa-plus-circle"></i> Form Order Sparepart
-                        </h2>
-                        <form id="orderForm">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">NAMA TEKNISI</label>
-                                    <select class="form-select" id="namaTeknisi" required>
-                                        <option value="">Pilih Teknisi</option>
-                                        <option value="HARMINDO">HARMINDO</option>
-                                        <option value="INOSENCIUS">INOSENCIUS</option>
-                                        <option value="RIZALDI">RIZALDI</option>
-                                        <option value="YANDRI">YANDRI</option>
-                                        <option value="FAUZI">FAUZI</option>
-                                        <option value="KRISTIAN">KRISTIAN</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">TGL</label>
-                                    <input type="date" class="form-input" id="tgl" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NO. CASE</label>
-                                    <input type="text" class="form-input" id="noCase" placeholder="Masukkan nomor case" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">TYPE</label>
-                                    <input type="text" class="form-input" id="type" placeholder="Masukkan type" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NO. SERI</label>
-                                    <input type="text" class="form-input" id="noSeri" placeholder="Masukkan nomor seri" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NO. PART</label>
-                                    <input type="text" class="form-input" id="noPart" placeholder="Masukkan nomor part" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NAMA ITEM</label>
-                                    <input type="text" class="form-input" id="namaItem" placeholder="Masukkan nama item" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">JUMLAH</label>
-                                    <input type="number" class="form-input" id="jumlah" min="1" placeholder="1" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">KATEGORI PRODUK</label>
-                                    <select class="form-select" id="kategoriProduk" required>
-                                        <option value="">Pilih Kategori</option>
-                                        <option value="AV">AV</option>
-                                        <option value="HA">HA</option>
-                                        <option value="EMP">EMP</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">LAYANAN</label>
-                                    <select class="form-select" id="layanan" required>
-                                        <option value="">Pilih Layanan</option>
-                                        <option value="KUNJUNGAN TOKO">KUNJUNGAN TOKO</option>
-                                        <option value="KUNJUNGAN CALL">KUNJUNGAN CALL</option>
-                                        <option value="KUNJUNGAN LK">KUNJUNGAN LK</option>
-                                        <option value="PSR FLORES">PSR FLORES</option>
-                                        <option value="KONSUMEN LANGSUNG">KONSUMEN LANGSUNG</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NAMA KONSUMEN</label>
-                                    <input type="text" class="form-input" id="namaKonsumen" placeholder="Masukkan nama konsumen" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">NO. TELP</label>
-                                    <input type="tel" class="form-input" id="noTelp" placeholder="Masukkan nomor telepon" required>
-                                </div>
-                            </div>
-                            <div class="btn-group">
-                                <button type="submit" class="btn btn-primary" id="submitOrderBtn">
-                                    <i class="fas fa-save"></i> Simpan Order
-                                </button>
-                                <button type="reset" class="btn btn-secondary">
-                                    <i class="fas fa-redo"></i> Reset Form
-                                </button>
-                            </div>
-                        </form>
-                    </section>
-                </div>
-
-                <!-- Daftar Order Page -->
-                <div class="page-section" id="daftar-order">
-                    <!-- Compact Upload Section -->
-                    <section class="upload-section">
-                        <div class="upload-header">
-                            <h3 class="upload-title">
-                                <i class="fas fa-upload"></i> Upload Data Excel
-                            </h3>
-                        </div>
-                        <div class="upload-area" id="uploadArea">
-                            <div class="upload-content">
-                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                                <div>
-                                    <p class="upload-text">Klik atau seret file Excel ke sini</p>
-                                    <p class="upload-hint">Format: .xlsx, .xls (Maks. 5MB)</p>
-                                </div>
-                            </div>
-                            <input type="file" id="fileInput" accept=".xlsx,.xls">
-                        </div>
-                        <div class="upload-actions">
-                            <button class="btn btn-upload btn-sm" onclick="document.getElementById('fileInput').click()">
-                                <i class="fas fa-file-upload"></i> Pilih File
-                            </button>
-                            <button class="btn btn-secondary btn-sm" onclick="clearUploadArea()">
-                                <i class="fas fa-times"></i> Clear
-                            </button>
-                        </div>
-                    </section>
-
-                    <!-- Table Section -->
-                    <section class="table-section">
-                        <div class="table-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-list"></i> Daftar Order Sparepart
-                            </h2>
-                            <div class="table-actions">
-                                <button class="btn btn-excel" onclick="downloadExcel()">
-                                    <i class="fas fa-file-excel"></i> Download Excel
-                                </button>
-                                <div class="search-box">
-                                    <i class="fas fa-search"></i>
-                                    <input type="text" id="searchInput" placeholder="Cari order...">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="orderTable">
-                                <thead>
-                                    <tr>
-                                        <th>NO</th>
-                                        <th>NAMA TEKNISI</th>
-                                        <th>TGL</th>
-                                        <th>NO. CASE</th>
-                                        <th>TYPE</th>
-                                        <th>NO. SERI</th>
-                                        <th>NO. PART</th>
-                                        <th>NAMA ITEM</th>
-                                        <th>JUMLAH</th>
-                                        <th>KATEGORI</th>
-                                        <th>LAYANAN</th>
-                                        <th>KONSUMEN</th>
-                                        <th>NO. TELP</th>
-                                        <th>TGL ORDER</th>
-                                        <th>NO. ORDER</th>
-                                        <th>KETERANGAN</th>
-                                        <th>STATUS</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tableBody">
-                                    <!-- Data akan diisi oleh JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </div>
-
-                <!-- Admin Sparepart Page -->
-                <div class="page-section" id="admin-sparepart">
-                    <!-- Table Section -->
-                    <section class="table-section">
-                        <div class="table-header">
-                            <h2 class="section-title">
-                                <i class="fas fa-tools"></i> Admin Sparepart - Kelola Semua Order
-                            </h2>
-                            <div class="table-actions">
-                                <button class="btn btn-excel" onclick="downloadAdminExcel()">
-                                    <i class="fas fa-file-excel"></i> Download Excel
-                                </button>
-                                <div class="search-box">
-                                    <i class="fas fa-search"></i>
-                                    <input type="text" id="adminSearchInput" placeholder="Cari order...">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="adminOrderTable">
-                                <thead>
-                                    <tr>
-                                        <th>NO</th>
-                                        <th>NAMA TEKNISI</th>
-                                        <th>TGL</th>
-                                        <th>NO. CASE</th>
-                                        <th>TYPE</th>
-                                        <th>NO. SERI</th>
-                                        <th>NO. PART</th>
-                                        <th>NAMA ITEM</th>
-                                        <th>JUMLAH</th>
-                                        <th>KATEGORI</th>
-                                        <th>LAYANAN</th>
-                                        <th>KONSUMEN</th>
-                                        <th>NO. TELP</th>
-                                        <th>TGL ORDER</th>
-                                        <th>NO. ORDER</th>
-                                        <th>KETERANGAN</th>
-                                        <th>STATUS</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="adminTableBody">
-                                    <!-- Data akan diisi oleh JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </div>
-
-                <!-- Other Pages (Placeholder) -->
-                <div class="page-section" id="pelanggan">
-                    <div class="form-section">
-                        <h2 class="section-title">
-                            <i class="fas fa-users"></i> Pelanggan
-                        </h2>
-                        <p>Halaman Pelanggan sedang dalam pengembangan...</p>
-                    </div>
-                </div>
-
-                <div class="page-section" id="laporan">
-                    <div class="form-section">
-                        <h2 class="section-title">
-                            <i class="fas fa-chart-bar"></i> Laporan
-                        </h2>
-                        <p>Halaman Laporan sedang dalam pengembangan...</p>
-                    </div>
-                </div>
-
-                <div class="page-section" id="pengaturan">
-                    <div class="form-section">
-                        <h2 class="section-title">
-                            <i class="fas fa-cog"></i> Pengaturan
-                        </h2>
-                        <p>Halaman Pengaturan sedang dalam pengembangan...</p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Edit Modal -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Edit Order</h3>
-                <button class="modal-close" onclick="closeEditModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="editOrderForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">NAMA TEKNISI</label>
-                        <select class="form-select" id="editNamaTeknisi" required>
-                            <option value="">Pilih Teknisi</option>
-                            <option value="HARMINDO">HARMINDO</option>
-                            <option value="INOSENCIUS">INOSENCIUS</option>
-                            <option value="RIZALDI">RIZALDI</option>
-                            <option value="YANDRI">YANDRI</option>
-                            <option value="FAUZI">FAUZI</option>
-                            <option value="KRISTIAN">KRISTIAN</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">TGL</label>
-                        <input type="date" class="form-input" id="editTgl" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">NO. CASE</label>
-                        <input type="text" class="form-input" id="editNoCase" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">TYPE</label>
-                        <input type="text" class="form-input" id="editType" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">NO. SERI</label>
-                        <input type="text" class="form-input" id="editNoSeri" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">NO. PART</label>
-                        <input type="text" class="form-input" id="editNoPart" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">NAMA ITEM</label>
-                        <input type="text" class="form-input" id="editNamaItem" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">JUMLAH</label>
-                        <input type="number" class="form-input" id="editJumlah" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">KATEGORI PRODUK</label>
-                        <select class="form-select" id="editKategoriProduk" required>
-                            <option value="">Pilih Kategori</option>
-                            <option value="AV">AV</option>
-                            <option value="HA">HA</option>
-                            <option value="EMP">EMP</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">LAYANAN</label>
-                        <select class="form-select" id="editLayanan" required>
-                            <option value="">Pilih Layanan</option>
-                            <option value="KUNJUNGAN TOKO">KUNJUNGAN TOKO</option>
-                            <option value="KUNJUNGAN CALL">KUNJUNGAN CALL</option>
-                            <option value="KUNJUNGAN LK">KUNJUNGAN LK</option>
-                            <option value="PSR FLORES">PSR FLORES</option>
-                            <option value="KONSUMEN LANGSUNG">KONSUMEN LANGSUNG</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">NAMA KONSUMEN</label>
-                        <input type="text" class="form-input" id="editNamaKonsumen" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">NO. TELP</label>
-                        <input type="tel" class="form-input" id="editNoTelp" required>
-                    </div>
-                    <div class="form-group" id="editTglOrderGroup">
-                        <label class="form-label">TGL ORDER</label>
-                        <input type="date" class="form-input" id="editTglOrder">
-                    </div>
-                    <div class="form-group" id="editNoOrderGroup">
-                        <label class="form-label">NO. ORDER</label>
-                        <input type="text" class="form-input" id="editNoOrder">
-                    </div>
-                    <div class="form-group" id="editKeteranganGroup">
-                        <label class="form-label">KETERANGAN</label>
-                        <input type="text" class="form-input" id="editKeterangan">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">STATUS</label>
-                        <select class="form-select" id="editStatus">
-                            <option value="OPEN">OPEN</option>
-                            <option value="READY">READY</option>
-                            <option value="FINISH">FINISH</option>
-                            <option value="PROSES">PROSES PEMENUHAN</option>
-                            <option value="TEKNIS">TEKNIS</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="btn-group" style="margin-top: 15px;">
-                    <button type="submit" class="btn btn-primary" id="updateOrderBtn">
-                        <i class="fas fa-save"></i> Simpan Perubahan
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
-                        <i class="fas fa-times"></i> Batal
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Konfirmasi -->
-    <div class="modal" id="confirmModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Konfirmasi Hapus</h3>
-                <button class="modal-close" onclick="closeModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <p>Apakah Anda yakin ingin menghapus order ini?</p>
-            <div class="btn-group" style="margin-top: 15px;">
-                <button class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fas fa-trash"></i> Hapus
-                </button>
-                <button class="btn btn-secondary" onclick="closeModal()">
-                    <i class="fas fa-times"></i> Batal
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
+    <!-- MODAL: BUAT FOLDER -->
+    <div class="modal-overlay" id="modal-folder">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('modal-folder')">&times;</button>
+            <h2><i class="fa-solid fa-folder-plus"></i> Buat Folder Baru</h2>
+            <input type="text" id="folder-name" placeholder="Nama Folder (contoh: Invoice)">
+            <button onclick="createFolder()">Buat Folder</button>
+        </div>
+    </div>
+
+    <!-- MODAL: UPLOAD FILE -->
+    <div class="modal-overlay" id="modal-upload">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('modal-upload')">&times;</button>
+            <h2><i class="fa-solid fa-cloud-arrow-up"></i> Upload File</h2>
+            <input type="file" id="file-input" style="margin-bottom: 15px;">
+            <select id="upload-folder" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="">-- Pilih Folder (Opsional) --</option>
+            </select>
+            <button onclick="uploadFile()" id="btn-upload">Upload</button>
+            <div id="upload-progress" style="display:none; margin-top: 15px; color: var(--primary);"><i class="fa-solid fa-spinner fa-spin"></i> Mengupload...</div>
+        </div>
+    </div>
+
+    <!-- MODAL: PREVIEW -->
+    <div class="modal-overlay" id="modal-preview">
+        <div class="modal" style="width: 800px;">
+            <button class="modal-close" onclick="closeModal('modal-preview')">&times;</button>
+            <div class="preview-container" id="preview-content"></div>
+        </div>
+    </div>
 
     <script>
-        // API Configuration
-        const API_BASE_URL = 'https://your-api-domain.com/api'; // Ganti dengan URL API Anda
-        let orders = [];
-        let editingIndex = -1;
-        let deleteIndex = -1;
-        let currentPage = 'dashboard';
-        let isOnline = navigator.onLine;
+        // --- KONFIGURASI FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDdf7eR7te23_F1rLcbEnJ3PRErVMtUWg",
+            authDomain: "data-sercom-service.firebaseapp.com",
+            projectId: "data-sercom-service",
+            storageBucket: "data-sercom-service.firebasestorage.app",
+            messagingSenderId: "473084415084",
+            appId: "1:473084415084:web:554500633302edb312dc49"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('tgl').value = today;
-            
-            // Setup event listeners
-            setupEventListeners();
-            
-            // Setup upload functionality
-            setupUploadFunctionality();
-            
-            // Setup connection monitoring
-            setupConnectionMonitoring();
-            
-            // Load data from API
-            loadData();
+        // --- STATE ---
+        let currentView = 'grid';
+        let currentPath = ''; // '' = root, nama folder jika di dalam folder
+        let currentFilter = 'all';
+        let allFiles = [];
+        let allFolders = [];
+
+        // --- AUTH ---
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('user-email').innerText = user.email;
+                loadData();
+            } else {
+                document.getElementById('login-page').style.display = 'flex';
+                document.getElementById('main-app').style.display = 'none';
+            }
         });
 
-        // Setup connection monitoring
-        function setupConnectionMonitoring() {
-            window.addEventListener('online', () => {
-                isOnline = true;
-                updateConnectionStatus();
-                loadData(); // Reload data when back online
+        function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(err => {
+                document.getElementById('login-error').style.display = 'block';
             });
-            
-            window.addEventListener('offline', () => {
-                isOnline = false;
-                updateConnectionStatus();
-            });
-            
-            updateConnectionStatus();
         }
 
-        // Update connection status indicator
-        function updateConnectionStatus() {
-            const statusEl = document.getElementById('connectionStatus');
-            if (isOnline) {
-                statusEl.className = 'connection-status online';
-                statusEl.innerHTML = '<i class="fas fa-wifi"></i><span>Online</span>';
+        function logout() {
+            auth.signOut();
+        }
+
+        // --- LOAD DATA ---
+        function loadData() {
+            db.collection('folders').orderBy('nama').onSnapshot(snap => {
+                allFolders = [];
+                snap.forEach(doc => allFolders.push({id: doc.id, ...doc.data()}));
+                updateStats();
+                renderFoldersDropdown();
+                renderFiles();
+            });
+
+            db.collection('files').orderBy('tanggal', 'desc').onSnapshot(snap => {
+                allFiles = [];
+                snap.forEach(doc => allFiles.push({id: doc.id, ...doc.data()}));
+                updateStats();
+                renderFiles();
+            });
+        }
+
+        // --- NAVIGASI & FILTER ---
+        function navigate(type) {
+            currentFilter = type;
+            if(type !== 'all' && type !== 'folder') currentPath = '';
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            event.target.closest('.menu-item').classList.add('active');
+            renderFiles();
+        }
+
+        function enterFolder(nama) {
+            currentPath = nama;
+            currentFilter = 'all';
+            renderFiles();
+        }
+
+        function goHome() {
+            currentPath = '';
+            renderFiles();
+        }
+
+        // --- FOLDER MANAGEMENT ---
+        function openFolderModal() { document.getElementById('modal-folder').style.display = 'flex'; }
+
+        async function createFolder() {
+            const nama = document.getElementById('folder-name').value;
+            if(!nama) return alert("Nama folder wajib diisi!");
+            await db.collection('folders').add({ nama: nama, tanggal: new Date().toISOString().split('T')[0] });
+            document.getElementById('folder-name').value = '';
+            closeModal('modal-folder');
+        }
+
+        async function deleteFolder(id, nama) {
+            if(!confirm(`Hapus folder ${nama} dan semua file di dalamnya?`)) return;
+            // Hapus file di dalam folder tersebut
+            const batch = db.batch();
+            const filesInFolder = allFiles.filter(f => f.folder === nama);
+            filesInFolder.forEach(f => {
+                batch.delete(db.collection('files').doc(f.id));
+                storage.refFromURL(f.url).delete().catch(e=>{}); // hapus storage
+            });
+            batch.delete(db.collection('folders').doc(id));
+            await batch.commit();
+        }
+
+        // --- UPLOAD FILE ---
+        function openUploadModal() {
+            document.getElementById('modal-upload').style.display = 'flex';
+            if(currentPath) document.getElementById('upload-folder').value = currentPath;
+        }
+
+        async function uploadFile() {
+            const file = document.getElementById('file-input').files[0];
+            if(!file) return alert("Pilih file dulu!");
+            
+            const folder = document.getElementById('upload-folder').value;
+            document.getElementById('upload-progress').style.display = 'block';
+            document.getElementById('btn-upload').disabled = true;
+
+            try {
+                const ref = storage.ref('files/' + Date.now() + '_' + file.name);
+                await ref.put(file);
+                const url = await ref.getDownloadURL();
+
+                const tipe = getFileType(file.name);
+                await db.collection('files').add({
+                    nama: file.name,
+                    folder: folder,
+                    url: url,
+                    tipe: tipe,
+                    size: file.size,
+                    uploadBy: auth.currentUser.email,
+                    tanggal: new Date().toISOString().split('T')[0]
+                });
+
+                closeModal('modal-upload');
+                document.getElementById('file-input').value = '';
+                document.getElementById('upload-progress').style.display = 'none';
+                document.getElementById('btn-upload').disabled = false;
+            } catch(err) {
+                alert("Gagal upload: " + err.message);
+                document.getElementById('upload-progress').style.display = 'none';
+                document.getElementById('btn-upload').disabled = false;
+            }
+        }
+
+        // Drag & Drop
+        const contentDiv = document.querySelector('.content');
+        const dropZone = document.getElementById('drop-zone');
+        
+        contentDiv.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.display = 'block'; dropZone.classList.add('active'); });
+        contentDiv.addEventListener('dragleave', e => { if(e.target == contentDiv || e.target == dropZone) { dropZone.style.display = 'none'; dropZone.classList.remove('active'); }});
+        contentDiv.addEventListener('drop', async e => {
+            e.preventDefault();
+            dropZone.style.display = 'none';
+            dropZone.classList.remove('active');
+            
+            const file = e.dataTransfer.files[0];
+            if(!file) return;
+
+            const ref = storage.ref('files/' + Date.now() + '_' + file.name);
+            await ref.put(file);
+            const url = await ref.getDownloadURL();
+            const tipe = getFileType(file.name);
+            
+            await db.collection('files').add({
+                nama: file.name,
+                folder: currentPath,
+                url: url,
+                tipe: tipe,
+                size: file.size,
+                uploadBy: auth.currentUser.email,
+                tanggal: new Date().toISOString().split('T')[0]
+            });
+        });
+
+        // --- DELETE FILE ---
+        async function deleteFile(id, url) {
+            if(!confirm("Hapus file ini?")) return;
+            try {
+                await storage.refFromURL(url).delete();
+            } catch(e) {}
+            await db.collection('files').doc(id).delete();
+        }
+
+        // --- RENDER UI ---
+        function renderFiles() {
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            
+            // Update Path
+            const pathEl = document.getElementById('current-path');
+            pathEl.innerHTML = currentPath ? `<i class="fa-solid fa-house" onclick="goHome()"></i> / ${currentPath}` : `<i class="fa-solid fa-house"></i> Beranda`;
+
+            // Filter Folders
+            let filteredFolders = allFolders;
+            if(currentPath === '') {
+                // Di root, tampilkan semua folder (jika filter all / folder)
+                if(currentFilter !== 'all' && currentFilter !== 'folder') filteredFolders = [];
             } else {
-                statusEl.className = 'connection-status offline';
-                statusEl.innerHTML = '<i class="fas fa-wifi-slash"></i><span>Offline</span>';
+                filteredFolders = []; // Di dalam folder, jangan tampilkan folder lain
             }
-        }
 
-        // API Helper Functions
-        async function apiRequest(endpoint, options = {}) {
-            const url = `${API_BASE_URL}${endpoint}`;
-            const defaultOptions = {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            };
-            
-            const config = { ...defaultOptions, ...options };
-            
-            try {
-                const response = await fetch(url, config);
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('API Request Error:', error);
-                throw error;
-            }
-        }
+            // Filter Files
+            let filteredFiles = allFiles.filter(f => {
+                // Path logic
+                if(currentPath !== '' && f.folder !== currentPath) return false;
+                if(currentPath === '' && f.folder !== '') return false; // File root tanpa folder
 
-        // Load data from API
-        async function loadData() {
-            if (!isOnline) {
-                showToast('Tidak ada koneksi internet. Menggunakan data lokal.', 'warning');
-                loadLocalData();
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                const data = await apiRequest('/orders');
-                orders = data;
-                
-                // Save to localStorage as backup
-                localStorage.setItem('ordersBackup', JSON.stringify(orders));
-                
-                renderTable();
-                renderAdminTable();
-                renderTeknisiTable();
-                updateDashboardStats();
-                showToast('Data berhasil dimuat dari server', 'success');
-            } catch (error) {
-                console.error('Error loading data:', error);
-                showToast('Gagal memuat data dari server. Menggunakan data lokal.', 'error');
-                loadLocalData();
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Load local data as backup
-        function loadLocalData() {
-            const savedData = localStorage.getItem('ordersBackup');
-            if (savedData) {
-                try {
-                    orders = JSON.parse(savedData);
-                    renderTable();
-                    renderAdminTable();
-                    renderTeknisiTable();
-                    updateDashboardStats();
-                } catch (e) {
-                    console.error('Error parsing local data:', e);
-                    showToast('Data lokal tidak valid', 'error');
-                }
-            }
-        }
-
-        // Save order to API
-        async function saveOrder(orderData) {
-            if (!isOnline) {
-                showToast('Tidak ada koneksi internet. Data akan disimpan secara lokal.', 'warning');
-                saveLocalOrder(orderData);
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                const newOrder = await apiRequest('/orders', {
-                    method: 'POST',
-                    body: JSON.stringify(orderData),
-                });
-                
-                orders.push(newOrder);
-                localStorage.setItem('ordersBackup', JSON.stringify(orders));
-                
-                renderTable();
-                renderAdminTable();
-                renderTeknisiTable();
-                updateDashboardStats();
-                showToast('Order berhasil disimpan ke server', 'success');
-            } catch (error) {
-                console.error('Error saving order:', error);
-                showToast('Gagal menyimpan ke server. Data disimpan secara lokal.', 'error');
-                saveLocalOrder(orderData);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Save order locally
-        function saveLocalOrder(orderData) {
-            orderData._id = Date.now().toString(); // Temporary ID
-            orderData._local = true; // Mark as local data
-            orders.push(orderData);
-            localStorage.setItem('ordersBackup', JSON.stringify(orders));
-            
-            renderTable();
-            renderAdminTable();
-            renderTeknisiTable();
-            updateDashboardStats();
-        }
-
-        // Update order in API
-        async function updateOrder(id, orderData) {
-            if (!isOnline) {
-                showToast('Tidak ada koneksi internet. Perubahan disimpan secara lokal.', 'warning');
-                updateLocalOrder(id, orderData);
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                const updatedOrder = await apiRequest(`/orders/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(orderData),
-                });
-                
-                const index = orders.findIndex(o => o._id === id);
-                if (index !== -1) {
-                    orders[index] = updatedOrder;
-                    localStorage.setItem('ordersBackup', JSON.stringify(orders));
-                }
-                
-                renderTable();
-                renderAdminTable();
-                renderTeknisiTable();
-                updateDashboardStats();
-                showToast('Order berhasil diperbarui di server', 'success');
-            } catch (error) {
-                console.error('Error updating order:', error);
-                showToast('Gagal memperbarui di server. Perubahan disimpan secara lokal.', 'error');
-                updateLocalOrder(id, orderData);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Update order locally
-        function updateLocalOrder(id, orderData) {
-            const index = orders.findIndex(o => o._id === id);
-            if (index !== -1) {
-                orders[index] = { ...orders[index], ...orderData, _local: true };
-                localStorage.setItem('ordersBackup', JSON.stringify(orders));
-                
-                renderTable();
-                renderAdminTable();
-                renderTeknisiTable();
-                updateDashboardStats();
-            }
-        }
-
-        // Delete order from API
-        async function deleteOrderFromAPI(id) {
-            if (!isOnline) {
-                showToast('Tidak ada koneksi internet. Tidak dapat menghapus data.', 'warning');
-                return false;
-            }
-            
-            try {
-                showLoading(true);
-                await apiRequest(`/orders/${id}`, {
-                    method: 'DELETE',
-                });
-                
+                // Filter logic
+                if(currentFilter === 'image') return f.tipe === 'image';
+                if(currentFilter === 'pdf') return f.tipe === 'pdf';
+                if(currentFilter === 'excel') return f.tipe === 'excel';
+                if(currentFilter === 'video') return f.tipe === 'video';
+                if(currentFilter === 'folder') return false; // Hanya folder saja
                 return true;
-            } catch (error) {
-                console.error('Error deleting order:', error);
-                showToast('Gagal menghapus dari server', 'error');
-                return false;
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Sync local data with server
-        async function syncLocalData() {
-            if (!isOnline) {
-                showToast('Tidak ada koneksi internet. Tidak dapat sinkronisasi.', 'warning');
-                return;
-            }
-            
-            const localOrders = orders.filter(o => o._local);
-            if (localOrders.length === 0) {
-                showToast('Tidak ada data lokal yang perlu disinkronkan', 'info');
-                return;
-            }
-            
-            try {
-                showLoading(true);
-                let syncedCount = 0;
-                
-                for (const order of localOrders) {
-                    try {
-                        if (order._deleted) {
-                            await deleteOrderFromAPI(order._id);
-                        } else {
-                            const { _local, _id, ...orderData } = order;
-                            if (_id.toString().startsWith(Date.now().toString().substring(0, 10))) {
-                                // New order
-                                await apiRequest('/orders', {
-                                    method: 'POST',
-                                    body: JSON.stringify(orderData),
-                                });
-                            } else {
-                                // Updated order
-                                await apiRequest(`/orders/${_id}`, {
-                                    method: 'PUT',
-                                    body: JSON.stringify(orderData),
-                                });
-                            }
-                        }
-                        syncedCount++;
-                    } catch (error) {
-                        console.error('Error syncing order:', order._id, error);
-                    }
-                }
-                
-                if (syncedCount > 0) {
-                    showToast(`${syncedCount} data berhasil disinkronkan`, 'success');
-                    loadData(); // Reload fresh data from server
-                }
-            } catch (error) {
-                console.error('Error syncing data:', error);
-                showToast('Gagal sinkronisasi data', 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Show/hide loading state
-        function showLoading(show) {
-            const submitBtn = document.getElementById('submitOrderBtn');
-            const updateBtn = document.getElementById('updateOrderBtn');
-            const deleteBtn = document.getElementById('confirmDeleteBtn');
-            
-            if (submitBtn) {
-                if (show) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner"></span> Menyimpan...';
-                } else {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Order';
-                }
-            }
-            
-            if (updateBtn) {
-                if (show) {
-                    updateBtn.disabled = true;
-                    updateBtn.innerHTML = '<span class="spinner"></span> Memperbarui...';
-                } else {
-                    updateBtn.disabled = false;
-                    updateBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
-                }
-            }
-            
-            if (deleteBtn) {
-                if (show) {
-                    deleteBtn.disabled = true;
-                    deleteBtn.innerHTML = '<span class="spinner"></span> Menghapus...';
-                } else {
-                    deleteBtn.disabled = false;
-                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus';
-                }
-            }
-        }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            // Menu toggle
-            document.getElementById('menuToggle').addEventListener('click', function() {
-                document.getElementById('sidebar').classList.toggle('active');
             });
 
-            // Form submit
-            document.getElementById('orderForm').addEventListener('submit', handleFormSubmit);
+            // Search logic
+            if(searchVal) {
+                filteredFolders = filteredFolders.filter(f => f.nama.toLowerCase().includes(searchVal));
+                filteredFiles = filteredFiles.filter(f => f.nama.toLowerCase().includes(searchVal));
+            }
 
-            // Edit form submit
-            document.getElementById('editOrderForm').addEventListener('submit', handleEditFormSubmit);
+            // GRID VIEW
+            const gridHtml = [];
+            filteredFolders.forEach(f => {
+                gridHtml.push(`
+                    <div class="file-card" ondblclick="enterFolder('${f.nama}')">
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteFolder('${f.id}', '${f.nama}')"><i class="fa-solid fa-trash"></i></button>
+                        <div class="icon clr-folder"><i class="fa-solid fa-folder"></i></div>
+                        <div class="name" title="${f.nama}">${f.nama}</div>
+                    </div>
+                `);
+            });
 
-            // Search functionality
-            document.getElementById('searchInput').addEventListener('input', handleSearch);
-            document.getElementById('adminSearchInput').addEventListener('input', handleAdminSearch);
-            document.getElementById('teknisiSearchInput').addEventListener('input', handleTeknisiSearch);
+            filteredFiles.forEach(f => {
+                gridHtml.push(`
+                    <div class="file-card" onclick="previewFile('${f.id}')">
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteFile('${f.id}', '${f.url}')"><i class="fa-solid fa-trash"></i></button>
+                        <div class="icon ${getColor(f.tipe)}">${getIcon(f.tipe)}</div>
+                        <div class="name" title="${f.nama}">${f.nama}</div>
+                        <div class="date">${formatSize(f.size)}</div>
+                    </div>
+                `);
+            });
+            document.getElementById('file-grid').innerHTML = gridHtml.length ? gridHtml.join('') : '<p style="color:#999">Tidak ada file.</p>';
 
-            // Menu item clicks
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const page = this.getAttribute('data-page');
-                    switchPage(page);
-                });
+            // LIST VIEW
+            const listHtml = [];
+            filteredFolders.forEach(f => {
+                listHtml.push(`
+                    <tr ondblclick="enterFolder('${f.nama}')" style="cursor:pointer;">
+                        <td><i class="fa-solid fa-folder clr-folder"></i> ${f.nama}</td>
+                        <td>Folder</td><td>-</td><td>${f.tanggal}</td>
+                        <td><button onclick="event.stopPropagation(); deleteFolder('${f.id}', '${f.nama}')" style="color:red; border:none; cursor:pointer;"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>
+                `);
+            });
+
+            filteredFiles.forEach(f => {
+                listHtml.push(`
+                    <tr onclick="previewFile('${f.id}')" style="cursor:pointer;">
+                        <td>${getIcon(f.tipe)} ${f.nama}</td>
+                        <td>${f.tipe.toUpperCase()}</td>
+                        <td>${formatSize(f.size)}</td><td>${f.tanggal}</td>
+                        <td><button onclick="event.stopPropagation(); deleteFile('${f.id}', '${f.url}')" style="color:red; border:none; cursor:pointer;"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>
+                `);
+            });
+            document.getElementById('file-list-body').innerHTML = listHtml.join('');
+
+            setView(currentView); // apply view state
+        }
+
+        function updateStats() {
+            document.getElementById('stat-files').innerText = allFiles.length;
+            document.getElementById('stat-folders').innerText = allFolders.length;
+            const totalBytes = allFiles.reduce((sum, f) => sum + f.size, 0);
+            document.getElementById('stat-size').innerText = formatSize(totalBytes);
+        }
+
+        function renderFoldersDropdown() {
+            const sel = document.getElementById('upload-folder');
+            sel.innerHTML = '<option value="">-- Pilih Folder (Opsional) --</option>';
+            allFolders.forEach(f => {
+                sel.innerHTML += `<option value="${f.nama}">${f.nama}</option>`;
             });
         }
 
-        // Setup upload functionality
-        function setupUploadFunctionality() {
-            const uploadArea = document.getElementById('uploadArea');
-            const fileInput = document.getElementById('fileInput');
-
-            // Click to upload
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            // Drag and drop
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileUpload(files[0]);
-                }
-            });
-
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileUpload(e.target.files[0]);
-                }
-            });
+        function setView(type) {
+            currentView = type;
+            if(type === 'grid') {
+                document.getElementById('file-grid').style.display = 'grid';
+                document.getElementById('file-list').style.display = 'none';
+                document.getElementById('btn-grid').classList.add('active');
+                document.getElementById('btn-list').classList.remove('active');
+            } else {
+                document.getElementById('file-grid').style.display = 'none';
+                document.getElementById('file-list').style.display = 'block';
+                document.getElementById('btn-list').classList.add('active');
+                document.getElementById('btn-grid').classList.remove('active');
+            }
         }
 
-        // Handle file upload
-        async function handleFileUpload(file) {
-            // Validate file type
-            const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
-            if (!validTypes.includes(file.type)) {
-                showToast('Format file tidak valid. Harap upload file Excel (.xlsx atau .xls)', 'error');
-                return;
+        // --- PREVIEW & DOWNLOAD ---
+        function previewFile(id) {
+            const f = allFiles.find(x => x.id === id);
+            if(!f) return;
+
+            const previewEl = document.getElementById('preview-content');
+            let html = `<h3>${f.nama}</h3>`;
+
+            if(f.tipe === 'image') {
+                html += `<img src="${f.url}" alt="${f.nama}">`;
+            } else if(f.tipe === 'pdf') {
+                html += `<iframe src="${f.url}" width="100%" height="500px"></iframe>`;
+            } else {
+                html += `<div style="padding: 40px; text-align: center; font-size: 50px;">${getIcon(f.tipe)}</div>`;
             }
 
-            // Validate file size (5MB max)
-            const maxSize = 5 * 1024 * 1024; // 5MB
-            if (file.size > maxSize) {
-                showToast('Ukuran file terlalu besar. Maksimal 5MB', 'error');
-                return;
-            }
-
-            // Read file
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    
-                    // Get first worksheet
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    // Process uploaded data
-                    await processUploadedData(jsonData);
-                } catch (error) {
-                    showToast('Error membaca file Excel: ' + error.message, 'error');
-                }
-            };
-            reader.readAsArrayBuffer(file);
+            html += `<a href="${f.url}" download="${f.nama}" class="btn-download"><i class="fa-solid fa-download"></i> Download</a>`;
+            previewEl.innerHTML = html;
+            document.getElementById('modal-preview').style.display = 'flex';
         }
 
-        // Process uploaded data
-        async function processUploadedData(jsonData) {
-            if (jsonData.length < 2) {
-                showToast('File Excel tidak memiliki data yang valid', 'error');
-                return;
-            }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-            // Get headers from first row
-            const headers = jsonData[0];
-            
-            // Create mapping object for flexible header matching
-            const headerMapping = {
-                'nama teknisi': ['nama teknisi', 'teknisi', 'nama_teknisi', 'teknisi name'],
-                'tgl': ['tgl', 'tanggal', 'date', 'tanggal order', 'order date'],
-                'no. case': ['no. case', 'no case', 'case', 'case number', 'nomor case', 'case_no'],
-                'type': ['type', 'tipe', 'jenis', 'product type', 'jenis produk'],
-                'no. seri': ['no. seri', 'no seri', 'seri', 'serial', 'serial number', 'nomor seri', 'sn'],
-                'no. part': ['no. part', 'no part', 'part', 'part number', 'nomor part', 'part_no'],
-                'nama item': ['nama item', 'item', 'nama barang', 'product name', 'item name'],
-                'jumlah': ['jumlah', 'qty', 'quantity', 'jumlah item', 'unit'],
-                'kategori produk': ['kategori produk', 'kategori', 'category', 'product category'],
-                'layanan': ['layanan', 'service', 'jenis layanan', 'service type'],
-                'nama konsumen': ['nama konsumen', 'konsumen', 'customer', 'customer name', 'pelanggan'],
-                'no. telp': ['no. telp', 'no telp', 'telepon', 'telp', 'phone', 'no hp', 'hp', 'telephone'],
-                'tgl order': ['tgl order', 'tanggal order', 'order date', 'order tgl'],
-                'no. order': ['no. order', 'no order', 'order', 'order number', 'nomor order', 'order_no'],
-                'keterangan': ['keterangan', 'catatan', 'notes', 'description', 'deskripsi'],
-                'status': ['status', 'state', 'condition', 'order status']
-            };
-
-            // Create normalized header mapping
-            const normalizedHeaders = {};
-            headers.forEach((header, index) => {
-                if (header) {
-                    const normalized = header.toString().toLowerCase().trim();
-                    normalizedHeaders[normalized] = index;
-                }
-            });
-
-            // Find column indices for each field
-            const columnIndices = {};
-            for (const [field, possibleHeaders] of Object.entries(headerMapping)) {
-                for (const possibleHeader of possibleHeaders) {
-                    const normalized = possibleHeader.toLowerCase().trim();
-                    if (normalizedHeaders[normalized] !== undefined) {
-                        columnIndices[field] = normalizedHeaders[normalized];
-                        break;
-                    }
-                }
-            }
-
-            // Check if all required fields are found
-            const requiredFields = [
-                'nama teknisi', 'tgl', 'no. case', 'type', 'no. seri', 
-                'no. part', 'nama item', 'jumlah', 'kategori produk', 
-                'layanan', 'nama konsumen', 'no. telp'
-            ];
-            
-            const missingFields = requiredFields.filter(field => columnIndices[field] === undefined);
-            if (missingFields.length > 0) {
-                showToast(`Kolom yang diperlukan tidak ditemukan: ${missingFields.join(', ')}`, 'error');
-                return;
-            }
-
-            // Process data rows
-            let successCount = 0;
-            let errorCount = 0;
-            const errors = [];
-
-            for (let i = 1; i < jsonData.length; i++) {
-                const row = jsonData[i];
-                if (row.length === 0 || row.every(cell => !cell)) continue; // Skip empty rows
-
-                try {
-                    // Map columns to data object using flexible mapping
-                    const orderData = {
-                        namaTeknisi: row[columnIndices['nama teknisi']] || '',
-                        tgl: formatDate(row[columnIndices['tgl']]) || '',
-                        noCase: row[columnIndices['no. case']] || '',
-                        type: row[columnIndices['type']] || '',
-                        noSeri: row[columnIndices['no. seri']] || '',
-                        noPart: row[columnIndices['no. part']] || '',
-                        namaItem: row[columnIndices['nama item']] || '',
-                        jumlah: parseInt(row[columnIndices['jumlah']]) || 1,
-                        kategoriProduk: row[columnIndices['kategori produk']] || '',
-                        layanan: row[columnIndices['layanan']] || '',
-                        namaKonsumen: row[columnIndices['nama konsumen']] || '',
-                        noTelp: row[columnIndices['no. telp']] || '',
-                        tglOrder: formatDate(row[columnIndices['tgl order']]) || '',
-                        noOrder: row[columnIndices['no. order']] || '',
-                        keterangan: row[columnIndices['keterangan']] || '',
-                        status: row[columnIndices['status']] || 'OPEN'
-                    };
-
-                    // Validate required fields
-                    if (!orderData.namaTeknisi || !orderData.tgl || !orderData.noCase || 
-                        !orderData.type || !orderData.noSeri || !orderData.noPart || 
-                        !orderData.namaItem || !orderData.kategoriProduk || 
-                        !orderData.layanan || !orderData.namaKonsumen || !orderData.noTelp) {
-                        errors.push(`Baris ${i + 1}: Data tidak lengkap`);
-                        errorCount++;
-                        continue;
-                    }
-
-                    // Save order
-                    await saveOrder(orderData);
-                    successCount++;
-                } catch (error) {
-                    errors.push(`Baris ${i + 1}: ${error.message}`);
-                    errorCount++;
-                }
-            }
-
-            // Show results
-            if (successCount > 0) {
-                showToast(`${successCount} data berhasil diupload!`, 'success');
-            }
-            
-            if (errorCount > 0) {
-                showToast(`${errorCount} data gagal diupload. Lihat console untuk detail.`, 'warning');
-                console.log('Upload errors:', errors);
-            }
-
-            // Clear file input
-            document.getElementById('fileInput').value = '';
+        // --- HELPER FUNCTIONS ---
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if(['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) return 'image';
+            if(ext === 'pdf') return 'pdf';
+            if(['xls', 'xlsx'].includes(ext)) return 'excel';
+            if(['doc', 'docx'].includes(ext)) return 'word';
+            if(['mp4', 'avi', 'mkv'].includes(ext)) return 'video';
+            return 'other';
         }
 
-        // Format date function
-        function formatDate(dateValue) {
-            if (!dateValue) return '';
-            
-            // If it's already a date string in YYYY-MM-DD format
-            if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
-                return dateValue;
-            }
-            
-            // If it's a number (Excel date format)
-            if (typeof dateValue === 'number') {
-                const date = new Date((dateValue - 25569) * 86400 * 1000);
-                return date.toISOString().split('T')[0];
-            }
-            
-            // If it's a date object
-            if (dateValue instanceof Date) {
-                return dateValue.toISOString().split('T')[0];
-            }
-            
-            // Try to parse as date string
-            const parsedDate = new Date(dateValue);
-            if (!isNaN(parsedDate.getTime())) {
-                return parsedDate.toISOString().split('T')[0];
-            }
-            
+        function getIcon(tipe) {
+            if(tipe === 'image') return '<i class="fa-solid fa-file-image"></i>';
+            if(tipe === 'pdf') return '<i class="fa-solid fa-file-pdf"></i>';
+            if(tipe === 'excel') return '<i class="fa-solid fa-file-excel"></i>';
+            if(tipe === 'word') return '<i class="fa-solid fa-file-word"></i>';
+            if(tipe === 'video') return '<i class="fa-solid fa-file-video"></i>';
+            return '<i class="fa-solid fa-file"></i>';
+        }
+
+        function getColor(tipe) {
+            if(tipe === 'image') return 'clr-img';
+            if(tipe === 'pdf') return 'clr-pdf';
+            if(tipe === 'excel') return 'clr-excel';
+            if(tipe === 'word') return 'clr-word';
+            if(tipe === 'video') return 'clr-video';
             return '';
         }
 
-        // Clear upload area
-        function clearUploadArea() {
-            document.getElementById('fileInput').value = '';
-            showToast('Upload area dibersihkan', 'info');
-        }
-
-        // Switch page
-        function switchPage(pageName) {
-            // Hide all pages
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // Show selected page
-            const selectedPage = document.getElementById(pageName);
-            if (selectedPage) {
-                selectedPage.classList.add('active');
-            }
-
-            // Update active menu
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
-
-            // Update page title
-            const titles = {
-                'dashboard': 'Order Sparepart Elektronik',
-                'order-baru': 'Order Baru',
-                'daftar-order': 'Daftar Order',
-                'teknisi': 'Data Order Teknisi',
-                'admin-sparepart': 'Admin Sparepart',
-                'pelanggan': 'Pelanggan',
-                'laporan': 'Laporan',
-                'pengaturan': 'Pengaturan'
-            };
-            document.getElementById('pageTitle').textContent = titles[pageName] || 'Order Sparepart Elektronik';
-
-            currentPage = pageName;
-
-            // Show toast for menu navigation
-            showToast(`Navigasi ke ${titles[pageName]}`, 'info');
-
-            // Refresh tables when switching to relevant pages
-            if (pageName === 'daftar-order' || pageName === 'admin-sparepart' || pageName === 'teknisi') {
-                renderTable();
-                renderAdminTable();
-                renderTeknisiTable();
-            }
-            
-            // Update dashboard stats when switching to dashboard
-            if (pageName === 'dashboard') {
-                updateDashboardStats();
-            }
-        }
-
-        // Update dashboard statistics
-        function updateDashboardStats() {
-            // Update total orders
-            document.getElementById('totalOrderValue').textContent = orders.length;
-            
-            // Update today's orders
-            const today = new Date().toISOString().split('T')[0];
-            const todayOrders = orders.filter(order => order.tgl === today);
-            document.getElementById('todayOrderValue').textContent = todayOrders.length;
-            
-            // Update pending orders (OPEN + READY + PROSES + TEKNIS)
-            const pendingOrders = orders.filter(order => 
-                order.status === 'OPEN' || 
-                order.status === 'READY' || 
-                order.status === 'PROSES' || 
-                order.status === 'TEKNIS'
-            );
-            document.getElementById('pendingOrderValue').textContent = pendingOrders.length;
-            
-            // Update status counts
-            const openOrders = orders.filter(order => order.status === 'OPEN');
-            const readyOrders = orders.filter(order => order.status === 'READY');
-            const finishOrders = orders.filter(order => order.status === 'FINISH');
-            
-            document.getElementById('openOrderValue').textContent = openOrders.length;
-            document.getElementById('readyOrderValue').textContent = readyOrders.length;
-            document.getElementById('finishOrderValue').textContent = finishOrders.length;
-            
-            // Update PROSES PEMENUHAN
-            const prosesPemenuhanOrders = orders.filter(order => order.status === 'PROSES');
-            document.getElementById('prosesPemenuhanValue').textContent = prosesPemenuhanOrders.length;
-            
-            // Update TEKNIS
-            const teknisOrders = orders.filter(order => order.status === 'TEKNIS');
-            document.getElementById('teknisValue').textContent = teknisOrders.length;
-        }
-
-        // Handle form submit
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            const formData = {
-                namaTeknisi: document.getElementById('namaTeknisi').value,
-                tgl: document.getElementById('tgl').value,
-                noCase: document.getElementById('noCase').value,
-                type: document.getElementById('type').value,
-                noSeri: document.getElementById('noSeri').value,
-                noPart: document.getElementById('noPart').value,
-                namaItem: document.getElementById('namaItem').value,
-                jumlah: document.getElementById('jumlah').value,
-                kategoriProduk: document.getElementById('kategoriProduk').value,
-                layanan: document.getElementById('layanan').value,
-                namaKonsumen: document.getElementById('namaKonsumen').value,
-                noTelp: document.getElementById('noTelp').value,
-                keterangan: '',
-                status: 'OPEN'
-            };
-
-            await saveOrder(formData);
-            
-            document.getElementById('orderForm').reset();
-            document.getElementById('tgl').value = new Date().toISOString().split('T')[0];
-        }
-
-        // Handle edit form submit
-        async function handleEditFormSubmit(e) {
-            e.preventDefault();
-            
-            if (editingIndex >= 0) {
-                const order = orders[editingIndex];
-                const formData = {
-                    namaTeknisi: document.getElementById('editNamaTeknisi').value,
-                    tgl: document.getElementById('editTgl').value,
-                    noCase: document.getElementById('editNoCase').value,
-                    type: document.getElementById('editType').value,
-                    noSeri: document.getElementById('editNoSeri').value,
-                    noPart: document.getElementById('editNoPart').value,
-                    namaItem: document.getElementById('editNamaItem').value,
-                    jumlah: document.getElementById('editJumlah').value,
-                    kategoriProduk: document.getElementById('editKategoriProduk').value,
-                    layanan: document.getElementById('editLayanan').value,
-                    namaKonsumen: document.getElementById('editNamaKonsumen').value,
-                    noTelp: document.getElementById('editNoTelp').value,
-                    tglOrder: document.getElementById('editTglOrder').value,
-                    noOrder: document.getElementById('editNoOrder').value,
-                    keterangan: document.getElementById('editKeterangan').value,
-                    status: document.getElementById('editStatus').value
-                };
-
-                await updateOrder(order._id, formData);
-                closeEditModal();
-                editingIndex = -1;
-            }
-        }
-
-        // Render table for Daftar Order page
-        function renderTable() {
-            const tbody = document.getElementById('tableBody');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-
-            orders.forEach((order, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${order.namaTeknisi}</td>
-                    <td>${order.tgl}</td>
-                    <td>${order.noCase}</td>
-                    <td>${order.type}</td>
-                    <td>${order.noSeri}</td>
-                    <td>${order.noPart}</td>
-                    <td>${order.namaItem}</td>
-                    <td>${order.jumlah}</td>
-                    <td>${order.kategoriProduk}</td>
-                    <td>${order.layanan}</td>
-                    <td>${order.namaKonsumen}</td>
-                    <td>${order.noTelp}</td>
-                    <td>${order.tglOrder || '-'}</td>
-                    <td>${order.noOrder || '-'}</td>
-                    <td>${order.keterangan || '-'}</td>
-                    <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status === 'PROSES' ? 'PROSES PEMENUHAN' : order.status}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Render table for Admin Sparepart page
-        function renderAdminTable() {
-            const tbody = document.getElementById('adminTableBody');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-
-            orders.forEach((order, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${order.namaTeknisi}</td>
-                    <td>${order.tgl}</td>
-                    <td>${order.noCase}</td>
-                    <td>${order.type}</td>
-                    <td>${order.noSeri}</td>
-                    <td>${order.noPart}</td>
-                    <td>${order.namaItem}</td>
-                    <td>${order.jumlah}</td>
-                    <td>${order.kategoriProduk}</td>
-                    <td>${order.layanan}</td>
-                    <td>${order.namaKonsumen}</td>
-                    <td>${order.noTelp}</td>
-                    <td>${order.tglOrder || '-'}</td>
-                    <td>${order.noOrder || '-'}</td>
-                    <td>${order.keterangan || '-'}</td>
-                    <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status === 'PROSES' ? 'PROSES PEMENUHAN' : order.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn edit" onclick="editOrderFromAdmin(${index})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete" onclick="deleteOrder(${index})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Render table for Teknisi page
-        function renderTeknisiTable() {
-            const tbody = document.getElementById('teknisiTableBody');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-
-            orders.forEach((order, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${order.namaTeknisi}</td>
-                    <td>${order.tgl}</td>
-                    <td>${order.noCase}</td>
-                    <td>${order.type}</td>
-                    <td>${order.noSeri}</td>
-                    <td>${order.noPart}</td>
-                    <td>${order.namaItem}</td>
-                    <td>${order.jumlah}</td>
-                    <td>${order.kategoriProduk}</td>
-                    <td>${order.layanan}</td>
-                    <td>${order.namaKonsumen}</td>
-                    <td>${order.noTelp}</td>
-                    <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status === 'PROSES' ? 'PROSES PEMENUHAN' : order.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="action-btn edit" onclick="editOrderFromTeknisi(${index})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Download Excel function for Daftar Order
-        function downloadExcel() {
-            if (orders.length === 0) {
-                showToast('Tidak ada data untuk diunduh', 'error');
-                return;
-            }
-
-            // Prepare data for Excel
-            const headers = [
-                'NO',
-                'NAMA TEKNISI',
-                'TGL',
-                'NO. CASE',
-                'TYPE',
-                'NO. SERI',
-                'NO. PART',
-                'NAMA ITEM',
-                'JUMLAH',
-                'KATEGORI PRODUK',
-                'LAYANAN',
-                'NAMA KONSUMEN',
-                'NO. TELP',
-                'TGL ORDER',
-                'NO. ORDER',
-                'KETERANGAN',
-                'STATUS'
-            ];
-
-            const excelData = [headers];
-            
-            orders.forEach((order, index) => {
-                excelData.push([
-                    index + 1,
-                    order.namaTeknisi,
-                    order.tgl,
-                    order.noCase,
-                    order.type,
-                    order.noSeri,
-                    order.noPart,
-                    order.namaItem,
-                    order.jumlah,
-                    order.kategoriProduk,
-                    order.layanan,
-                    order.namaKonsumen,
-                    order.noTelp,
-                    order.tglOrder || '',
-                    order.noOrder || '',
-                    order.keterangan || '',
-                    order.status === 'PROSES' ? 'PROSES PEMENUHAN' : order.status
-                ]);
-            });
-
-            // Create workbook
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(excelData);
-
-            // Set column widths
-            const colWidths = [
-                { wch: 5 },   // NO
-                { wch: 15 },  // NAMA TEKNISI
-                { wch: 12 },  // TGL
-                { wch: 12 },  // NO. CASE
-                { wch: 15 },  // TYPE
-                { wch: 15 },  // NO. SERI
-                { wch: 12 },  // NO. PART
-                { wch: 20 },  // NAMA ITEM
-                { wch: 8 },   // JUMLAH
-                { wch: 15 },  // KATEGORI PRODUK
-                { wch: 15 },  // LAYANAN
-                { wch: 20 },  // NAMA KONSUMEN
-                { wch: 15 },  // NO. TELP
-                { wch: 12 },  // TGL ORDER
-                { wch: 12 },  // NO. ORDER
-                { wch: 30 },  // KETERANGAN
-                { wch: 15 }   // STATUS
-            ];
-            ws['!cols'] = colWidths;
-
-            // Add worksheet to workbook
-            XLSX.utils.book_append_sheet(wb, ws, "Data Order Sparepart");
-
-            // Generate filename with current date
-            const today = new Date().toISOString().split('T')[0];
-            const fileName = `Data_Order_Sparepart_${today}.xlsx`;
-
-            // Save the file
-            XLSX.writeFile(wb, fileName);
-            
-            showToast('Data berhasil diunduh dalam format Excel', 'success');
-        }
-
-        // Download Excel function for Admin Sparepart
-        function downloadAdminExcel() {
-            if (orders.length === 0) {
-                showToast('Tidak ada data untuk diunduh', 'error');
-                return;
-            }
-
-            // Prepare data for Excel
-            const headers = [
-                'NO',
-                'NAMA TEKNISI',
-                'TGL',
-                'NO. CASE',
-                'TYPE',
-                'NO. SERI',
-                'NO. PART',
-                'NAMA ITEM',
-                'JUMLAH',
-                'KATEGORI PRODUK',
-                'LAYANAN',
-                'NAMA KONSUMEN',
-                'NO. TELP',
-                'TGL ORDER',
-                'NO. ORDER',
-                'KETERANGAN',
-                'STATUS'
-            ];
-
-            const excelData = [headers];
-            
-            orders.forEach((order, index) => {
-                excelData.push([
-                    index + 1,
-                    order.namaTeknisi,
-                    order.tgl,
-                    order.noCase,
-                    order.type,
-                    order.noSeri,
-                    order.noPart,
-                    order.namaItem,
-                    order.jumlah,
-                    order.kategoriProduk,
-                    order.layanan,
-                    order.namaKonsumen,
-                    order.noTelp,
-                    order.tglOrder || '',
-                    order.noOrder || '',
-                    order.keterangan || '',
-                    order.status === 'PROSES' ? 'PROSES PEMENUHAN' : order.status
-                ]);
-            });
-
-            // Create workbook
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(excelData);
-
-            // Set column widths
-            const colWidths = [
-                { wch: 5 },   // NO
-                { wch: 15 },  // NAMA TEKNISI
-                { wch: 12 },  // TGL
-                { wch: 12 },  // NO. CASE
-                { wch: 15 },  // TYPE
-                { wch: 15 },  // NO. SERI
-                { wch: 12 },  // NO. PART
-                { wch: 20 },  // NAMA ITEM
-                { wch: 8 },   // JUMLAH
-                { wch: 15 },  // KATEGORI PRODUK
-                { wch: 15 },  // LAYANAN
-                { wch: 20 },  // NAMA KONSUMEN
-                { wch: 15 },  // NO. TELP
-                { wch: 12 },  // TGL ORDER
-                { wch: 12 },  // NO. ORDER
-                { wch: 30 },  // KETERANGAN
-                { wch: 15 }   // STATUS
-            ];
-            ws['!cols'] = colWidths;
-
-            // Add worksheet to workbook
-            XLSX.utils.book_append_sheet(wb, ws, "Data Order Sparepart");
-
-            // Generate filename with current date
-            const today = new Date().toISOString().split('T')[0];
-            const fileName = `Data_Order_Sparepart_Admin_${today}.xlsx`;
-
-            // Save the file
-            XLSX.writeFile(wb, fileName);
-            
-            showToast('Data berhasil diunduh dalam format Excel', 'success');
-        }
-
-        // Download Excel function for Teknisi page
-        function downloadTeknisiExcel() {
-            if (orders.length === 0) {
-                showToast('Tidak ada data untuk diunduh', 'error');
-                return;
-            }
-
-            // Prepare data for Excel
-            const headers = [
-                'NO',
-                'NAMA TEKNISI',
-                'TGL',
-                'NO. CASE',
-                'TYPE',
-                'NO. SERI',
-                'NO. PART',
-                'NAMA ITEM',
-                'JUMLAH',
-                'KATEGORI PRODUK',
-                'LAYANAN',
-                'NAMA KONSUMEN',
-                'NO. TELP',
-                'STATUS'
-            ];
-
-            const excelData = [headers];
-            
-            orders.forEach((order, index) => {
-                excelData.push([
-                    index + 1,
-                    order.namaTeknisi,
-                    order.tgl,
-                    order.noCase,
-                    order.type,
-                    order.noSeri,
-                    order.noPart,
-                    order.namaItem,
-                    order.jumlah,
-                    order.kategoriProduk,
-                    order.layanan,
-                    order.namaKonsumen,
-                    order.noTelp,
-                    order.status === 'PROSES' ? 'PROSES PEMENUHAN' : order.status
-                ]);
-            });
-
-            // Create workbook
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(excelData);
-
-            // Set column widths
-            const colWidths = [
-                { wch: 5 },   // NO
-                { wch: 15 },  // NAMA TEKNISI
-                { wch: 12 },  // TGL
-                { wch: 12 },  // NO. CASE
-                { wch: 15 },  // TYPE
-                { wch: 15 },  // NO. SERI
-                { wch: 12 },  // NO. PART
-                { wch: 20 },  // NAMA ITEM
-                { wch: 8 },   // JUMLAH
-                { wch: 15 },  // KATEGORI PRODUK
-                { wch: 15 },  // LAYANAN
-                { wch: 20 },  // NAMA KONSUMEN
-                { wch: 15 },  // NO. TELP
-                { wch: 15 }   // STATUS
-            ];
-            ws['!cols'] = colWidths;
-
-            // Add worksheet to workbook
-            XLSX.utils.book_append_sheet(wb, ws, "Data Order Teknisi");
-
-            // Generate filename with current date
-            const today = new Date().toISOString().split('T')[0];
-            const fileName = `Data_Order_Teknisi_${today}.xlsx`;
-
-            // Save the file
-            XLSX.writeFile(wb, fileName);
-            
-            showToast('Data teknisi berhasil diunduh dalam format Excel', 'success');
-        }
-
-        // Edit order from Daftar Order table
-        function editOrderFromTable(index) {
-            editOrder(index);
-            switchPage('order-baru');
-        }
-
-        // Edit order from Admin Sparepart table
-        function editOrderFromAdmin(index) {
-            const order = orders[index];
-            editingIndex = index;
-
-            // Fill edit form
-            document.getElementById('editNamaTeknisi').value = order.namaTeknisi;
-            document.getElementById('editTgl').value = order.tgl;
-            document.getElementById('editNoCase').value = order.noCase;
-            document.getElementById('editType').value = order.type;
-            document.getElementById('editNoSeri').value = order.noSeri;
-            document.getElementById('editNoPart').value = order.noPart;
-            document.getElementById('editNamaItem').value = order.namaItem;
-            document.getElementById('editJumlah').value = order.jumlah;
-            document.getElementById('editKategoriProduk').value = order.kategoriProduk;
-            document.getElementById('editLayanan').value = order.layanan;
-            document.getElementById('editNamaKonsumen').value = order.namaKonsumen;
-            document.getElementById('editNoTelp').value = order.noTelp;
-            document.getElementById('editTglOrder').value = order.tglOrder || '';
-            document.getElementById('editNoOrder').value = order.noOrder || '';
-            document.getElementById('editKeterangan').value = order.keterangan || '';
-            document.getElementById('editStatus').value = order.status;
-
-            // Show all fields for admin
-            document.getElementById('editTglOrderGroup').classList.remove('hide-for-teknisi');
-            document.getElementById('editNoOrderGroup').classList.remove('hide-for-teknisi');
-            document.getElementById('editKeteranganGroup').classList.remove('hide-for-teknisi');
-
-            // Show edit modal
-            document.getElementById('editModal').classList.add('active');
-            showToast('Edit order', 'info');
-        }
-
-        // Edit order from Teknisi table
-        function editOrderFromTeknisi(index) {
-            const order = orders[index];
-            editingIndex = index;
-
-            // Fill edit form
-            document.getElementById('editNamaTeknisi').value = order.namaTeknisi;
-            document.getElementById('editTgl').value = order.tgl;
-            document.getElementById('editNoCase').value = order.noCase;
-            document.getElementById('editType').value = order.type;
-            document.getElementById('editNoSeri').value = order.noSeri;
-            document.getElementById('editNoPart').value = order.noPart;
-            document.getElementById('editNamaItem').value = order.namaItem;
-            document.getElementById('editJumlah').value = order.jumlah;
-            document.getElementById('editKategoriProduk').value = order.kategoriProduk;
-            document.getElementById('editLayanan').value = order.layanan;
-            document.getElementById('editNamaKonsumen').value = order.namaKonsumen;
-            document.getElementById('editNoTelp').value = order.noTelp;
-            document.getElementById('editTglOrder').value = order.tglOrder || '';
-            document.getElementById('editNoOrder').value = order.noOrder || '';
-            document.getElementById('editKeterangan').value = order.keterangan || '';
-            document.getElementById('editStatus').value = order.status;
-
-            // Hide TGL ORDER, NO. ORDER, and KETERANGAN fields for teknisi
-            document.getElementById('editTglOrderGroup').classList.add('hide-for-teknisi');
-            document.getElementById('editNoOrderGroup').classList.add('hide-for-teknisi');
-            document.getElementById('editKeteranganGroup').classList.add('hide-for-teknisi');
-
-            // Show edit modal
-            document.getElementById('editModal').classList.add('active');
-            showToast('Edit order teknisi', 'info');
-        }
-
-        // Edit order (legacy function)
-        function editOrder(index) {
-            const order = orders[index];
-            editingIndex = index;
-
-            document.getElementById('namaTeknisi').value = order.namaTeknisi;
-            document.getElementById('tgl').value = order.tgl;
-            document.getElementById('noCase').value = order.noCase;
-            document.getElementById('type').value = order.type;
-            document.getElementById('noSeri').value = order.noSeri;
-            document.getElementById('noPart').value = order.noPart;
-            document.getElementById('namaItem').value = order.namaItem;
-            document.getElementById('jumlah').value = order.jumlah;
-            document.getElementById('kategoriProduk').value = order.kategoriProduk;
-            document.getElementById('layanan').value = order.layanan;
-            document.getElementById('namaKonsumen').value = order.namaKonsumen;
-            document.getElementById('noTelp').value = order.noTelp;
-
-            showToast('Edit order', 'info');
-        }
-
-        // Close edit modal
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('active');
-            editingIndex = -1;
-        }
-
-        // Delete order
-        async function deleteOrder(index) {
-            deleteIndex = index;
-            document.getElementById('confirmModal').classList.add('active');
-        }
-
-        // Confirm delete
-        async function confirmDelete() {
-            if (deleteIndex >= 0) {
-                const order = orders[deleteIndex];
-                
-                // Try to delete from API first
-                const deletedFromAPI = await deleteOrderFromAPI(order._id);
-                
-                // Always remove from local array
-                orders.splice(deleteIndex, 1);
-                
-                // Mark as deleted for sync if API delete failed
-                if (!deletedFromAPI && !order._local) {
-                    order._deleted = true;
-                    order._local = true;
-                    orders.push(order);
-                }
-                
-                // Update localStorage
-                localStorage.setItem('ordersBackup', JSON.stringify(orders));
-                
-                renderTable();
-                renderAdminTable();
-                renderTeknisiTable();
-                updateDashboardStats();
-                showToast('Order berhasil dihapus!', 'success');
-                closeModal();
-            }
-        }
-
-        // Close modal
-        function closeModal() {
-            document.getElementById('confirmModal').classList.remove('active');
-            deleteIndex = -1;
-        }
-
-        // Search functionality for Daftar Order
-        function handleSearch(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#tableBody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        }
-
-        // Search functionality for Admin Sparepart
-        function handleAdminSearch(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#adminTableBody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        }
-
-        // Search functionality for Teknisi page
-        function handleTeknisiSearch(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#teknisiTableBody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        }
-
-        // Show toast notification
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const editModal = document.getElementById('editModal');
-            const confirmModal = document.getElementById('confirmModal');
-            
-            if (event.target === editModal) {
-                closeEditModal();
-            }
-            if (event.target === confirmModal) {
-                closeModal();
-            }
+        function formatSize(bytes) {
+            if(bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
     </script>
 </body>
